@@ -4,15 +4,11 @@ from pcons import Val as V
 from decimal import Decimal as D
 import pcons
 
-origin = Point( (V(0), V(0)) )
-
 p = Pad( (D(10), D(20)) )
 q = Pad( (D(10), D(20)) )
 
 cons = []
-
-cons.append( FixedDist( D(0), p.corners[Pad.BL].x, origin.x ) )
-cons.append( FixedDist( D(0), p.corners[Pad.BL].y, origin.y ) )
+cons += pcons.set_origin( p.corners[Pad.BL] )
 
 cons.append( FixedDist( D(50),
                         p.corners[Pad.BL].x,

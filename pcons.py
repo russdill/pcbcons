@@ -134,8 +134,14 @@ def resolve( objects, constraints ):
 
     return len(unsat)
 
+# The origin
+O = Point( (Val(0),Val(0)) )
 
+def set_origin( point ):
+    l = []
 
-
+    l.append( FixedDist( 0, point.x, O.x ) )
+    l.append( FixedDist( 0, point.y, O.y ) )
+    return l
 
     
