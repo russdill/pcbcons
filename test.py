@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from pcons import Point, FixedDist, X, Y, Pad
+from pcons import Point, FixedDist, X, Y, Pad, Align
 from pcons import Val as V
 from decimal import Decimal as D
 import pcons
@@ -14,9 +14,8 @@ cons.append( FixedDist( D(50),
                         p.corners[Pad.BL].x,
                         q.corners[Pad.BL].x ) )
 
-cons.append( FixedDist( D(0),
-                        p.corners[Pad.BL].y,
-                        q.corners[Pad.BL].y ) )
+cons += Align( [ p.corners[Pad.BL],
+                 q.corners[Pad.BL] ], Y )
 
 pcons.resolve( [p,q], cons )
 

@@ -78,6 +78,17 @@ class FixedDist(object):
 
         return True
 
+def Align( points, axis ):
+    "Align all the given items in the specified axis"
+    assert axis in (X,Y)
+    c = []
+
+    for p in points[1:]:
+        c.append( FixedDist( D(0),
+                             points[0].pos[axis],
+                             p.pos[axis] ) )
+    return c
+
 class Pad(object):
     # Corners.  Bottom left, bottom right, top left, top right.
     BL, BR, TL, TR = 0,1,2,3
