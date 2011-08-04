@@ -17,6 +17,24 @@ class Point:
         else:
             self.pos = pos
 
+    @property
+    def x(self):
+        "x co-ordinate"
+        return self.pos[X]
+
+    @x.setter
+    def x(self, val):
+        self.pos[X] = val
+
+    @property
+    def y(self):
+        "y co-ordinate"
+        return self.pos[Y]
+
+    @y.setter
+    def y(self, val):
+        self.pos[Y] = val
+
     def __repr__(self):
         return """Point( %s )""" % ( str(self.pos) )
 
@@ -72,15 +90,15 @@ class Pad(object):
         c = self.corners = [ Point( (Val(), Val()) ) for x in range(0,4) ]
 
         # Constrain corners to be in-line
-        self.cons.append( FixedDist( D(0), c[self.BL].pos[X], c[self.TL].pos[X] ) )
-        self.cons.append( FixedDist( D(0), c[self.BR].pos[X], c[self.TR].pos[X] ) )
-        self.cons.append( FixedDist( D(0), c[self.BL].pos[Y], c[self.BR].pos[Y] ) )
-        self.cons.append( FixedDist( D(0), c[self.TL].pos[Y], c[self.TR].pos[Y] ) )
+        self.cons.append( FixedDist( D(0), c[self.BL].x, c[self.TL].x ) )
+        self.cons.append( FixedDist( D(0), c[self.BR].x, c[self.TR].x ) )
+        self.cons.append( FixedDist( D(0), c[self.BL].y, c[self.BR].y ) )
+        self.cons.append( FixedDist( D(0), c[self.TL].y, c[self.TR].y ) )
 
         # Space left-hand-side from right
-        self.cons.append( FixedDist( size[X], c[self.BL].pos[X], c[self.BR].pos[X] ) )
+        self.cons.append( FixedDist( size[X], c[self.BL].x, c[self.BR].x ) )
         # Space top from bottom
-        self.cons.append( FixedDist( size[Y], c[self.TL].pos[Y], c[self.BL].pos[Y] ) )
+        self.cons.append( FixedDist( size[Y], c[self.TL].y, c[self.BL].y ) )
 
     def __repr__(self):
         return "Pad( %s, %s, %s, %s )" % tuple(self.corners)

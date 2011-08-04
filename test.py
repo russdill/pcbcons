@@ -11,16 +11,16 @@ q = Pad( (D(10), D(20)) )
 
 cons = []
 
-cons.append( FixedDist( D(0), p.corners[Pad.BL].pos[X], origin.pos[X] ) )
-cons.append( FixedDist( D(0), p.corners[Pad.BL].pos[Y], origin.pos[Y] ) )
+cons.append( FixedDist( D(0), p.corners[Pad.BL].x, origin.x ) )
+cons.append( FixedDist( D(0), p.corners[Pad.BL].y, origin.y ) )
 
 cons.append( FixedDist( D(50),
-                        p.corners[Pad.BL].pos[X],
-                        q.corners[Pad.BL].pos[X] ) )
+                        p.corners[Pad.BL].x,
+                        q.corners[Pad.BL].x ) )
 
 cons.append( FixedDist( D(0),
-                        p.corners[Pad.BL].pos[Y],
-                        q.corners[Pad.BL].pos[Y] ) )
+                        p.corners[Pad.BL].y,
+                        q.corners[Pad.BL].y ) )
 
 pcons.resolve( [p,q], cons )
 
