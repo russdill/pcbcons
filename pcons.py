@@ -89,11 +89,14 @@ def filter_cons(t):
     cons = []
 
     for i in t:
-        cons += t.cons
+        cons += i.cons
     return cons
 
-def resolve( unsat ):
-    # unsat = filter_cons(things)
+def resolve( objects, constraints ):
+    unsat = []
+    unsat += constraints
+    unsat += filter_cons(objects)
+
     satisfied = []
     solved = 1
 
