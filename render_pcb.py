@@ -31,12 +31,18 @@ def render_pad( pad ):
     else:
         raise Exception( "Square pads are not yet supported :-(" )
 
-
     print """Pad[ %smm %smm %smm %smm %smm 0.1mm 0.1mm "TODO" "TODO" "square"]""" % (
         r1[0], r1[1], r2[0], r2[1], thickness*2 )
 
+def render_hole( hole ):
+    print """Pin[%smm %smm %smm 0mm 0mm %smm"" "" "hole"]""" % (
+        hole.pos.x.val, hole.pos.y.val,
+        hole.diameter,
+        hole.diameter + 0 )
+
 renderers = {
-    pcons.Pad: render_pad
+    pcons.Pad: render_pad,
+    pcons.Hole: render_hole
 }
 
 def render( objects ):
@@ -44,10 +50,16 @@ def render( objects ):
     print "("
 
     for obj in objects:
-        for k,r in renderers.iteritems():
+        rendered = False
 
+        for k,r in renderers.iteritems():
             if isinstance( obj, k ):
                 r( obj )
+                rendered = True
+                break
+
+        if not rendered:
+            raise Exception("No renderer for object.")
 
     print ")"
 

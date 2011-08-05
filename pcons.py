@@ -90,6 +90,7 @@ def Align( points, axis ):
     return c
 
 class Pad(object):
+    "A rectangular pad"
     # Corners.  Bottom left, bottom right, top left, top right.
     BL, BR, TL, TR = 0,1,2,3
 
@@ -113,6 +114,15 @@ class Pad(object):
 
     def __repr__(self):
         return "Pad( %s, %s, %s, %s )" % tuple(self.corners)
+
+class Hole(object):
+    "A hole in the PCB"
+    def __init__(self, diameter):
+        self.diameter = diameter
+        self.pos = Point( (Val(), Val()) )
+
+    def __repr__(self):
+        return "Hole( %s )" % self.pos
 
 def filter_cons(t):
     cons = []
