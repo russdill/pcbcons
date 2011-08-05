@@ -128,7 +128,10 @@ def filter_cons(t):
     cons = []
 
     for i in t:
-        cons += i.cons
+        try:
+            cons += i.cons
+        except AttributeError:
+            pass
     return cons
 
 def resolve( objects, constraints ):
@@ -165,4 +168,25 @@ def set_origin( point ):
     l.append( FixedDist( 0, point.y, O.y ) )
     return l
 
-    
+def pad_array( pad_size, num, direction, pitch ):
+    "Return an array of pads in the given direction with the given pitch"
+
+    pads = [Pad(pad_size) for x in range(0, num)]
+    cons = []
+
+    if direction == X:
+        perp = Y
+    else:
+        perp = X
+
+    for i in range(0, num-1):
+        # Sort out the pitch
+        cons += [ FixedDist( pitch,
+                             pads[i].corners[Pad.BL].pos[direction],
+                             pads[i+1].corners[Pad.BL].pos[direction] ) ]
+
+    # Align them all in the perpendicular axis
+    cons += Align( [p.corners[Pad.BL] for p in pads], perp )
+
+    return pads, cons
+
