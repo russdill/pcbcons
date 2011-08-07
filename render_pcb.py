@@ -3,31 +3,29 @@ from pcons import Pad
 # TODO: Get the soldermask and clearance into the Pad object
 
 def render_pad( pad ):
-    c = pad.corners
-
     # Need to work out the longest dimension
-    dims = ( c[Pad.TR].x.val - c[Pad.BL].x.val,
-             c[Pad.BL].y.val - c[Pad.TL].y.val )
+    dims = ( pad.tr.x.val - pad.bl.x.val,
+             pad.bl.y.val - pad.tl.y.val )
 
     if dims[0] > dims[1]:
         "Draw the pad in the x-direction"
         thickness = dims[1] / 2
 
-        r1 = ( c[Pad.BL].x.val + thickness,
-               c[Pad.BL].y.val - thickness )
+        r1 = ( pad.bl.x.val + thickness,
+               pad.bl.y.val - thickness )
 
-        r2 = ( c[Pad.BR].x.val - thickness,
-               c[Pad.BL].y.val - thickness )
+        r2 = ( pad.br.x.val - thickness,
+               pad.bl.y.val - thickness )
 
     elif dims[0] < dims[1]:
         "Draw the pad in the y-direction"
         thickness = dims[0] / 2
 
-        r1 = ( c[Pad.BL].x.val + thickness,
-               c[Pad.BL].y.val - thickness )
+        r1 = ( pad.bl.x.val + thickness,
+               pad.bl.y.val - thickness )
 
-        r2 = ( c[Pad.BL].x.val + thickness,
-               c[Pad.TR].y.val + thickness )
+        r2 = ( pad.bl.x.val + thickness,
+               pad.tr.y.val + thickness )
     else:
         raise Exception( "Square pads are not yet supported :-(" )
 

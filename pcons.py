@@ -91,29 +91,27 @@ def Align( points, axis ):
 
 class Pad(object):
     "A rectangular pad"
-    # Corners.  Bottom left, bottom right, top left, top right.
-    BL, BR, TL, TR = 0,1,2,3
-
     def __init__(self, size):
         self.cons = []
         self.size = size
 
         # Initialise with four unknown corner points
-        c = self.corners = [ Point( (Val(), Val()) ) for x in range(0,4) ]
+        self.bl, self.br, self.tl, self.tr = [ Point( (Val(), Val()) ) for x in range(0,4) ]
 
         # Constrain corners to be in-line
-        self.cons.append( FixedDist( D(0), c[self.BL].x, c[self.TL].x ) )
-        self.cons.append( FixedDist( D(0), c[self.BR].x, c[self.TR].x ) )
-        self.cons.append( FixedDist( D(0), c[self.BL].y, c[self.BR].y ) )
-        self.cons.append( FixedDist( D(0), c[self.TL].y, c[self.TR].y ) )
+        self.cons.append( FixedDist( D(0), self.bl.x, self.tl.x ) )
+        self.cons.append( FixedDist( D(0), self.br.x, self.tr.x ) )
+        self.cons.append( FixedDist( D(0), self.bl.y, self.br.y ) )
+        self.cons.append( FixedDist( D(0), self.tl.y, self.tr.y ) )
 
         # Space left-hand-side from right
-        self.cons.append( FixedDist( size[X], c[self.BL].x, c[self.BR].x ) )
+        self.cons.append( FixedDist( size[X], self.bl.x, self.br.x ) )
         # Space top from bottom
-        self.cons.append( FixedDist( size[Y], c[self.TL].y, c[self.BL].y ) )
+        self.cons.append( FixedDist( size[Y], self.tl.y, self.bl.y ) )
 
     def __repr__(self):
-        return "Pad( %s, %s, %s, %s )" % tuple(self.corners)
+        return "Pad( %s, %s, %s, %s )" % ( self.bl, self.br, self.tr, self.tl )
+
 
 class Hole(object):
     "A hole in the PCB"
@@ -182,11 +180,10 @@ def pad_array( pad_size, num, direction, pitch ):
     for i in range(0, num-1):
         # Sort out the pitch
         cons += [ FixedDist( pitch,
-                             pads[i].corners[Pad.BL].pos[direction],
-                             pads[i+1].corners[Pad.BL].pos[direction] ) ]
+                             pads[i].bl.pos[direction],
+                             pads[i+1].bl.pos[direction] ) ]
 
     # Align them all in the perpendicular axis
-    cons += Align( [p.corners[Pad.BL] for p in pads], perp )
+    cons += Align( [p.bl for p in pads], perp )
 
     return pads, cons
-
