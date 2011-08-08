@@ -29,11 +29,11 @@ def render_pad( pad ):
     else:
         raise Exception( "Square pads are not yet supported :-(" )
 
-    print """Pad[ %smm %smm %smm %smm %smm 0.1mm 0.1mm "%s" "%s" "square"]""" % (
+    print """\tPad[ %smm %smm %smm %smm %smm 0.1mm 0.1mm "%s" "%s" "square"]""" % (
         r1[0], r1[1], r2[0], r2[1], thickness*2, pad.name, pad.name )
 
 def render_hole( hole ):
-    print """Pin[%smm %smm %smm 0mm 0mm %smm"" "" "hole"]""" % (
+    print """\tPin[%smm %smm %smm 0mm 0mm %smm"" "" "hole"]""" % (
         hole.pos.x.val, hole.pos.y.val,
         hole.diameter,
         hole.diameter + 0 )
