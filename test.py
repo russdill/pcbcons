@@ -5,10 +5,15 @@ from decimal import Decimal as D
 import pcons
 import render_pcb
 
-pads, cons = pcons.pad_array( (D(10), D(20)), 10, X, D(12) )
+des = pcons.Design()
 
-cons += pcons.set_origin( pads[0].bl )
+pads = des.add_pad_array( (D(10), D(20)),
+                          names = [ "apple", "orange" ],
+                          direction = pcons.X,
+                          pitch = D(12) )
 
-pcons.resolve( pads, cons )
-render_pcb.render( pads )
+des.set_origin( pads[0].bl )
+
+des.resolve()
+render_pcb.render(des.ents)
 

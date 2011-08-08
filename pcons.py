@@ -91,9 +91,10 @@ def Align( points, axis ):
 
 class Pad(object):
     "A rectangular pad"
-    def __init__(self, size):
+    def __init__(self, size, name):
         self.cons = []
         self.size = size
+        self.name = name
 
         # Initialise with four unknown corner points
         self.bl, self.br, self.tl, self.tr = [ Point( (Val(), Val()) ) for x in range(0,4) ]
@@ -122,68 +123,89 @@ class Hole(object):
     def __repr__(self):
         return "Hole( %s )" % self.pos
 
-def filter_cons(t):
-    cons = []
-
-    for i in t:
-        try:
-            cons += i.cons
-        except AttributeError:
-            pass
-    return cons
-
-def resolve( objects, constraints ):
-    unsat = []
-    unsat += constraints
-    unsat += filter_cons(objects)
-
-    satisfied = []
-    solved = 1
-
-    while solved > 0 and len(unsat):
-        "Loop until there are no more soluble constraints"
-        sat = []
-
-        for c in unsat:
-            if c.resolve():
-                "Constraint solved"
-                sat.append(c)
-
-        solved = len(sat)
-        for c in sat:
-            satisfied.append(c)
-            unsat.remove(c)
-
-    return len(unsat)
 
 # The origin
 O = Point( (Val(0),Val(0)) )
 
-def set_origin( point ):
-    l = []
+class Design(object):
+    def __init__(self):
+        # Constraints
+        self.cons = []
 
-    l.append( FixedDist( 0, point.x, O.x ) )
-    l.append( FixedDist( 0, point.y, O.y ) )
-    return l
+        # Entities
+        self.ents = []
 
-def pad_array( pad_size, num, direction, pitch ):
-    "Return an array of pads in the given direction with the given pitch"
+    def clearance(self, clearance):
+        print "TODO: clearance"
 
-    pads = [Pad(pad_size) for x in range(0, num)]
-    cons = []
+    def mask_clearance(self, mask):
+        print "TODO: mask"
 
-    if direction == X:
-        perp = Y
-    else:
-        perp = X
+    def set_origin(self, point):
+        self.cons.append( FixedDist( 0, point.x, O.x ) )
+        self.cons.append( FixedDist( 0, point.y, O.y ) )
 
-    for i in range(0, num-1):
-        # Sort out the pitch
-        cons += [ FixedDist( pitch,
-                             pads[i].bl.pos[direction],
-                             pads[i+1].bl.pos[direction] ) ]
+    def add_hole(self, diam):
+        hole = Hole(diam)
+        self.ents.append(hole)
+        return hole
 
-    # Align them all in the perpendicular axis
-    cons += Align( [p.bl for p in pads], perp )
+    def add_pad( self, size, name ):
+        pad = Pad( size, name )
+        self.ents.append(pad)
+        return pad
 
-    return pads, cons
+    def add_pad_array( self, pad_size, names, direction, pitch ):
+        pads = [Pad(pad_size, name) for name in names]
+        self.ents += pads
+
+        if direction == X:
+            perp = Y
+        else:
+            perp = X
+
+        for i in range(0, len(pads)-1):
+            # Sort out the pitch
+            self.cons += [ FixedDist( pitch,
+                                      pads[i].bl.pos[direction],
+                                      pads[i+1].bl.pos[direction] ) ]
+
+        # Align them all in the perpendicular axis
+        self.cons += Align( [p.bl for p in pads], perp )
+
+        return pads
+
+    def _filter_obj_cons(self, t):
+        "Filter the constraints out of a list of objects"
+        cons = []
+
+        for i in t:
+            try:
+                cons += i.cons
+            except AttributeError:
+                pass
+        return cons
+        
+    def resolve(self):
+        unsat = []
+        unsat += self.cons
+        unsat += self._filter_obj_cons(self.ents)
+
+        satisfied = []
+        solved = 1
+
+        while solved > 0 and len(unsat):
+            "Loop until there are no more soluble constraints"
+            sat = []
+
+            for c in unsat:
+                if c.resolve():
+                    "Constraint solved"
+                    sat.append(c)
+
+            solved = len(sat)
+            for c in sat:
+                satisfied.append(c)
+                unsat.remove(c)
+
+        return len(unsat)
