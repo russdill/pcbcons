@@ -105,10 +105,12 @@ def Align( points, axis ):
 
 class Pad(object):
     "A rectangular pad"
-    def __init__(self, size, name):
+    def __init__(self, size, name, clearance = 0, mask_clearance = 0):
         self.cons = []
         self.size = size
         self.name = name
+        self.clearance = clearance
+        self.mask_clearance = mask_clearance
 
         # Initialise with four unknown corner points
         self.bl, self.br, self.tl, self.tr = [ Point( (Val(), Val()) ) for x in range(0,4) ]
@@ -136,9 +138,12 @@ class Pad(object):
 
 class Hole(object):
     "A hole in the PCB"
-    def __init__(self, diameter):
+    def __init__( self, diameter,
+                  clearance = 0, mask_clearance = 0 ):
         self.diameter = diameter
         self.pos = Point( (Val(), Val()) )
+        self.clearance = clearance
+        self.mask_clearance = mask_clearance
 
     def __repr__(self):
         return "Hole( %s )" % self.pos
@@ -155,29 +160,60 @@ class Design(object):
         # Entities
         self.ents = []
 
-    def clearance(self, clearance):
-        print "TODO: clearance"
+        self._clearance = D("0.2")
+        self._mask_clearance = D("0.1")
 
-    def mask_clearance(self, mask):
-        print "TODO: mask"
+    @property
+    def clearance(self):
+        "Default spacing between feature boundaries and other conductors"
+        return self._clearance
+
+    @clearance.setter
+    def clearance(self, value):
+        self._clearance = value
+
+    @property
+    def mask_clearance(self):
+        "Default spacing between feature boundaries and soldermask"
+        return self._mask_clearance
+
+    @mask_clearance.setter
+    def mask_clearance(self, value):
+        self._mask_clearance = value
 
     def set_origin(self, point):
         self.cons.append( FixedDist( 0, point.x, O.x ) )
         self.cons.append( FixedDist( 0, point.y, O.y ) )
 
-    def add_hole(self, diam):
-        hole = Hole(diam)
+    def add_hole(self, diam,
+                 clearance = None, mask_clearance = None ):
+        if clearance == None:
+            clearance = self.clearance
+        if mask_clearance == None:
+            mask_clearance = self.mask_clearance
+
+        hole = Hole(diam, clearance = clearance, mask_clearance = mask_clearance)
         self.ents.append(hole)
         return hole
 
-    def add_pad( self, size, name ):
-        pad = Pad( size, name )
+    def add_pad( self, size, name,
+                 clearance = None, mask_clearance = None ):
+
+        if clearance == None:
+            clearance = self.clearance
+        if mask_clearance == None:
+            mask_clearance = self.mask_clearance
+
+        pad = Pad( size, name,
+                   clearance = clearance, mask_clearance = mask_clearance )
         self.ents.append(pad)
         return pad
 
-    def add_pad_array( self, pad_size, names, direction, pitch ):
-        pads = [Pad(pad_size, name) for name in names]
-        self.ents += pads
+    def add_pad_array( self, pad_size, names, direction, pitch,
+                       clearance = None, mask_clearance = None ):
+        pads = [ self.add_pad( pad_size, name,
+                               clearance = clearance,
+                               mask_clearance = mask_clearance ) for name in names ]
 
         if direction == X:
             perp = Y
