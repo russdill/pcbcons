@@ -124,6 +124,12 @@ class Pad(object):
         # Space top from bottom
         self.cons.append( FixedDist( size[Y], self.tl.y, self.bl.y ) )
 
+        # Add a centre point
+        self.centre = Point( (Val(), Val()) )
+        # And put it in the centre
+        self.cons.append( FixedDist( size[X]/2, self.bl.x, self.centre.x ) )
+        self.cons.append( FixedDist( size[Y]/2, self.tl.y, self.centre.y ) )
+
     def __repr__(self):
         return "Pad( %s, %s, %s, %s )" % ( self.bl, self.br, self.tr, self.tl )
 
