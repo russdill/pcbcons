@@ -149,6 +149,13 @@ class Hole(object):
         return "Hole( %s )" % self.pos
 
 
+class SilkLine(object):
+    "A line on the silkscreen"
+    def __init__( self, thickness ):
+        self.thickness = thickness
+        self.start = Point( (Val(), Val()) )
+        self.end = Point( (Val(), Val()) )
+
 # The origin
 O = Point( (Val(0),Val(0)) )
 
@@ -230,6 +237,12 @@ class Design(object):
         self.cons += Align( [p.bl for p in pads], perp )
 
         return pads
+
+    def add_silk_line( self, thickness ):
+        l = SilkLine( thickness )
+        self.ents.append( l )
+
+        return l
 
     def _filter_obj_cons(self, t):
         "Filter the constraints out of a list of objects"

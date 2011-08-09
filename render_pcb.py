@@ -55,9 +55,16 @@ def render_hole( hole ):
         hole.clearance * 2, hole.mask_clearance + hole.diameter,
         hole.diameter + 0 )
 
+def render_silk_line( line ):
+    print """\tElementLine[ %smm %smm %smm %smm %smm ]""" % (
+        line.start.x.val, line.start.y.val,
+        line.end.x.val, line.end.y.val,
+        line.thickness )
+
 renderers = {
     pcons.Pad: render_pad,
-    pcons.Hole: render_hole
+    pcons.Hole: render_hole,
+    pcons.SilkLine: render_silk_line,
 }
 
 def render( objects ):
