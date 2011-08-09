@@ -167,26 +167,8 @@ class Design(object):
         # Entities
         self.ents = []
 
-        self._clearance = D("0.2")
-        self._mask_clearance = D("0.1")
-
-    @property
-    def clearance(self):
-        "Default spacing between feature boundaries and other conductors"
-        return self._clearance
-
-    @clearance.setter
-    def clearance(self, value):
-        self._clearance = value
-
-    @property
-    def mask_clearance(self):
-        "Default spacing between feature boundaries and soldermask"
-        return self._mask_clearance
-
-    @mask_clearance.setter
-    def mask_clearance(self, value):
-        self._mask_clearance = value
+        self.clearance = D("0.2")
+        self.mask_clearance = D("0.1")
 
     def set_origin(self, point):
         self.cons.append( FixedDist( 0, point.x, O.x ) )
