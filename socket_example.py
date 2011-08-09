@@ -5,14 +5,13 @@ from decimal import Decimal as D
 pad_size = ( D("0.55"), D("1.5") )
 hole_diam = D("0.8")
 
-des = pcons.Design()
+des = pcons.Design("example socket")
 
-# TODO: These aren't yet implemented
-# # Default clearance between copper and pad
-# des.clearance = D("0.2")
+# Default clearance between copper and pad
+des.clearance = D("0.2")
 
-# # Default clearance between copper and soldermask
-# des.mask_clearance = D("0.15")
+# Default clearance between copper and soldermask
+des.mask_clearance = D("0.15")
 
 # Create two rows of pads
 rows = []
@@ -58,4 +57,4 @@ des.cons += pcons.Align( (rows[0][0].tl, holes[0].pos), pcons.Y )
 des.cons += pcons.Align( (rows[1][0].bl, holes[1].pos), pcons.Y )
 
 des.resolve()
-render_pcb.render(des.ents)
+render_pcb.render(des)

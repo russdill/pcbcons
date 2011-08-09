@@ -5,7 +5,7 @@ from decimal import Decimal as D
 import pcons
 import render_pcb
 
-des = pcons.Design()
+des = pcons.Design("test")
 
 pads = des.add_pad_array( (D(10), D(20)),
                           names = [ "apple", "orange" ],
@@ -15,5 +15,5 @@ pads = des.add_pad_array( (D(10), D(20)),
 des.set_origin( pads[0].bl )
 
 des.resolve()
-render_pcb.render(des.ents)
+render_pcb.render(des)
 

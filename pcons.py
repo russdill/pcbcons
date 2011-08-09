@@ -167,7 +167,9 @@ class SilkCircle(object):
 O = Point( (Val(0),Val(0)) )
 
 class Design(object):
-    def __init__(self):
+    def __init__(self, desc):
+        self.desc = desc
+
         # Constraints
         self.cons = []
 

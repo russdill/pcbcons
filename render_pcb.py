@@ -74,11 +74,11 @@ renderers = {
     pcons.SilkCircle: render_silk_circle,
 }
 
-def render( objects ):
-    print """Element[0x00 "Thing" "" "Thing" 0 0 0 0 0 100 0x00000000]"""
+def render( des ):
+    print """Element[0x00 "%s" "" "" 0 0 0 0 0 100 0x00000000]""" % des.desc
     print "("
 
-    for obj in objects:
+    for obj in des.ents:
         rendered = False
 
         for k,r in renderers.iteritems():
