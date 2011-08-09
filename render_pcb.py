@@ -61,10 +61,17 @@ def render_silk_line( line ):
         line.end.x.val, line.end.y.val,
         line.thickness )
 
+def render_silk_circle( c ):
+    print """\tElementArc[ %smm %smm %smm %smm 0 360 %smm ]""" % (
+        c.pos.x.val, c.pos.y.val,
+        c.diameter, c.diameter,
+        c.thickness )
+
 renderers = {
     pcons.Pad: render_pad,
     pcons.Hole: render_hole,
     pcons.SilkLine: render_silk_line,
+    pcons.SilkCircle: render_silk_circle,
 }
 
 def render( objects ):

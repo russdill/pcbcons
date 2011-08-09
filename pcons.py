@@ -156,6 +156,13 @@ class SilkLine(object):
         self.start = Point( (Val(), Val()) )
         self.end = Point( (Val(), Val()) )
 
+class SilkCircle(object):
+    "A circle on the silkscreen"
+    def __init__( self, thickness, diameter ):
+        self.thickness = thickness
+        self.diameter = diameter
+        self.pos = Point()
+
 # The origin
 O = Point( (Val(0),Val(0)) )
 
@@ -219,6 +226,12 @@ class Design(object):
         self.cons += Align( [p.bl for p in pads], perp )
 
         return pads
+
+    def add_silk_circle( self, thickness, diameter ):
+        c = SilkCircle( thickness, diameter )
+        self.ents.append( c )
+        
+        return c
 
     def add_silk_line( self, thickness ):
         l = SilkLine( thickness )
