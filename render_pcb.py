@@ -72,6 +72,7 @@ renderers = {
     pcons.Hole: render_hole,
     pcons.SilkLine: render_silk_line,
     pcons.SilkCircle: render_silk_circle,
+    pcons.SilkRect: None,
 }
 
 def render( des ):
@@ -83,7 +84,8 @@ def render( des ):
 
         for k,r in renderers.iteritems():
             if isinstance( obj, k ):
-                r( obj )
+                if r != None:
+                    r( obj )
                 rendered = True
                 break
 

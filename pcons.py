@@ -163,6 +163,37 @@ class SilkCircle(object):
         self.diameter = diameter
         self.pos = Point()
 
+class SilkRect(object):
+    "A silkscreen rectangle made of four lines"
+    def __init__( self, thickness ):
+        self.thickness = thickness
+        self.lines = [ SilkLine(thickness) for x in range(0,4) ]
+        # Some things for convenience
+        self.t, self.b, self.r, self.l = self.lines
+        self.bl = self.b.start
+        self.br = self.b.end
+        self.tl = self.t.start
+        self.tr = self.t.end
+
+        self.cons = []
+
+        # Align everything we can
+        self.cons += Align( ( self.t.start,
+                              self.l.start, self.l.end,
+                              self.b.start ), X )
+
+        self.cons += Align( ( self.t.end,
+                              self.r.start, self.r.end,
+                              self.b.end ), X )
+
+        self.cons += Align( ( self.t.start, self.t.end,
+                              self.l.end,
+                              self.r.end ), Y )
+
+        self.cons += Align( ( self.b.start, self.b.end,
+                              self.l.start,
+                              self.r.start ), Y )
+
 # The origin
 O = Point( (Val(0),Val(0)) )
 
@@ -240,6 +271,13 @@ class Design(object):
         self.ents.append( l )
 
         return l
+
+    def add_silk_rect( self, thickness ):
+        "Add a silk rectangle.  Returns the four lines "
+        r = SilkRect( thickness )
+        self.ents += r.lines
+        self.ents += [r]
+        return r
 
     def _filter_obj_cons(self, t):
         "Filter the constraints out of a list of objects"
