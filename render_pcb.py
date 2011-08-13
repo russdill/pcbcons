@@ -14,7 +14,32 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import pcons
 from pcons import Pad
-# TODO: Get the soldermask and clearance into the Pad object
+
+def output_pad( x1, y1, x2, y2, thickness, clearance, mask, name ):
+    print """\tPad[ %smm %smm %smm %smm %smm %smm %smm "%s" "%s" "square"]""" % (
+        x1, y1, x2, y2, thickness*2,
+        clearance * 2, mask + thickness*2,
+        name, name )
+
+def render_square_pad( pad ):
+    "pcb doesn't support square pads - so hack it with two rectangles"
+    d = pad.tr.x.val - pad.bl.x.val
+    assert d == (pad.bl.y.val - pad.tl.y.val)
+
+    thickness = d / 4
+
+    p1 = ( ( pad.tl.x.val + thickness, pad.tl.y.val + thickness ),
+           ( pad.tr.x.val - thickness, pad.tl.y.val + thickness ) )
+
+    p2 = ( ( pad.bl.x.val + thickness, pad.bl.y.val - thickness ),
+           ( pad.br.x.val - thickness, pad.bl.y.val - thickness ) )
+
+    for p in (p1, p2):
+        output_pad( p[0][0], p[0][1], p[1][0], p[1][1],
+                    thickness = thickness,
+                    clearance = pad.clearance,
+                    mask = pad.mask_clearance,
+                    name = pad.name )
 
 def render_pad( pad ):
     # Need to work out the longest dimension
@@ -41,12 +66,14 @@ def render_pad( pad ):
         r2 = ( pad.bl.x.val + thickness,
                pad.tr.y.val + thickness )
     else:
-        raise Exception( "Square pads are not yet supported :-(" )
+        render_square_pad(pad)
+        return
 
-    print """\tPad[ %smm %smm %smm %smm %smm %smm %smm "%s" "%s" "square"]""" % (
-        r1[0], r1[1], r2[0], r2[1], thickness*2,
-        pad.clearance * 2, pad.mask_clearance + thickness*2,
-        pad.name, pad.name )
+    output_pad( r1[0], r1[1], r2[0], r2[1],
+                thickness = thickness,
+                clearance = pad.clearance,
+                mask = pad.mask_clearance,
+                name = pad.name )
 
 def render_hole( hole ):
     print """\tPin[ %smm %smm %smm %smm %smm %smm"" "" "hole"]""" % (
