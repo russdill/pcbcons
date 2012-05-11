@@ -105,12 +105,13 @@ def Align( points, axis ):
 
 class Pad(object):
     "A rectangular pad"
-    def __init__(self, size, name, clearance = 0, mask_clearance = 0):
+    def __init__(self, size, name, clearance = 0, mask_clearance = 0, r = D("0")):
         self.cons = []
         self.size = size
         self.name = name
         self.clearance = clearance
         self.mask_clearance = mask_clearance
+	self.r = r
 
         # Initialise with four unknown corner points
         self.bl, self.br, self.tl, self.tr = [ Point( (Val(), Val()) ) for x in range(0,4) ]
@@ -226,7 +227,7 @@ class Design(object):
         return hole
 
     def add_pad( self, size, name,
-                 clearance = None, mask_clearance = None ):
+                 clearance = None, mask_clearance = None, r = D("0") ):
 
         if clearance == None:
             clearance = self.clearance
@@ -234,15 +235,15 @@ class Design(object):
             mask_clearance = self.mask_clearance
 
         pad = Pad( size, name,
-                   clearance = clearance, mask_clearance = mask_clearance )
+                   clearance = clearance, mask_clearance = mask_clearance, r = r )
         self.ents.append(pad)
         return pad
 
     def add_pad_array( self, pad_size, names, direction, pitch,
-                       clearance = None, mask_clearance = None ):
+                       clearance = None, mask_clearance = None, r = D("0") ):
         pads = [ self.add_pad( pad_size, name,
                                clearance = clearance,
-                               mask_clearance = mask_clearance ) for name in names ]
+                               mask_clearance = mask_clearance, r = r ) for name in names ]
 
         if direction == X:
             perp = Y

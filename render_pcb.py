@@ -12,14 +12,15 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import copy
 import pcons
 from pcons import Pad
 
-def output_pad( x1, y1, x2, y2, thickness, clearance, mask, name ):
-    print """\tPad[ %smm %smm %smm %smm %smm %smm %smm "%s" "%s" "square"]""" % (
+def output_pad( x1, y1, x2, y2, thickness, clearance, mask, name, round ):
+    print """\tPad[ %smm %smm %smm %smm %smm %smm %smm "%s" "%s" "%s"]""" % (
         x1, y1, x2, y2, thickness*2,
         clearance * 2, mask + thickness*2,
-        name, name )
+        name, name, "round" if round else "square"  )
 
 def render_square_pad( pad ):
     "pcb doesn't support square pads - so hack it with two rectangles"
@@ -41,14 +42,15 @@ def render_square_pad( pad ):
                     mask = pad.mask_clearance,
                     name = pad.name )
 
-def render_pad( pad ):
+def render_simple_pad( pad, round = False ):
     # Need to work out the longest dimension
     dims = ( pad.tr.x.val - pad.bl.x.val,
              pad.bl.y.val - pad.tl.y.val )
 
+    thickness = min(dims) / 2
+
     if dims[0] > dims[1]:
         "Draw the pad in the x-direction"
-        thickness = dims[1] / 2
 
         r1 = ( pad.bl.x.val + thickness,
                pad.bl.y.val - thickness )
@@ -56,9 +58,8 @@ def render_pad( pad ):
         r2 = ( pad.br.x.val - thickness,
                pad.bl.y.val - thickness )
 
-    elif dims[0] < dims[1]:
+    elif dims[0] < dims[1] or round:
         "Draw the pad in the y-direction"
-        thickness = dims[0] / 2
 
         r1 = ( pad.bl.x.val + thickness,
                pad.bl.y.val - thickness )
@@ -73,7 +74,41 @@ def render_pad( pad ):
                 thickness = thickness,
                 clearance = pad.clearance,
                 mask = pad.mask_clearance,
-                name = pad.name )
+                name = pad.name,
+                round = round )
+
+def render_pad( pad ):
+
+    dims = ( pad.tr.x.val - pad.bl.x.val,
+             pad.bl.y.val - pad.tl.y.val )
+
+    thickness = min(dims) / 2
+    length = max(dims) / 2
+
+    if pad.r > 0 and pad.r < thickness:
+        middle_pad = copy.deepcopy( pad )
+        middle_pad.tr.x.val -= pad.r
+        middle_pad.br.x.val -= pad.r
+        middle_pad.tl.x.val += pad.r
+        middle_pad.bl.x.val += pad.r
+	render_simple_pad( middle_pad )
+
+        left_pad = copy.deepcopy( pad )
+        left_pad.br.x.val = left_pad.tr.x.val = left_pad.tl.x.val + pad.r * 2
+	render_simple_pad( left_pad, True )
+
+        right_pad = copy.deepcopy( pad )
+        right_pad.bl.x.val = left_pad.tl.x.val = left_pad.tl.x.val + pad.r * 2
+	render_simple_pad( right_pad, True )
+
+    elif pad.r == thickness:
+        render_simple_pad( pad, True )
+
+    elif pad.r == 0:
+        render_simple_pad( pad )
+
+    else:
+        raise Exception("Invalid r")
 
 def render_hole( hole ):
     print """\tPin[ %smm %smm %smm %smm %smm %smm"" "" "hole"]""" % (
