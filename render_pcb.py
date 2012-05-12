@@ -83,23 +83,35 @@ def render_pad( pad ):
              pad.bl.y.val - pad.tl.y.val )
 
     thickness = min(dims) / 2
-    length = max(dims) / 2
 
     if pad.r > 0 and pad.r < thickness:
-        middle_pad = copy.deepcopy( pad )
-        middle_pad.tr.x.val -= pad.r
-        middle_pad.br.x.val -= pad.r
-        middle_pad.tl.x.val += pad.r
-        middle_pad.bl.x.val += pad.r
-	render_simple_pad( middle_pad )
+        if thickness > pad.r:
+            middle_pad = copy.deepcopy( pad )
+            middle_pad.tr.x.val -= pad.r
+            middle_pad.br.x.val -= pad.r
+            middle_pad.tl.x.val += pad.r
+            middle_pad.bl.x.val += pad.r
+            middle_pad.tr.y.val += pad.r
+            middle_pad.br.y.val -= pad.r
+            middle_pad.tl.y.val += pad.r
+            middle_pad.bl.y.val -= pad.r
+            render_simple_pad( middle_pad )
 
         left_pad = copy.deepcopy( pad )
         left_pad.br.x.val = left_pad.tr.x.val = left_pad.tl.x.val + pad.r * 2
 	render_simple_pad( left_pad, True )
 
         right_pad = copy.deepcopy( pad )
-        right_pad.bl.x.val = left_pad.tl.x.val = left_pad.tl.x.val + pad.r * 2
+        right_pad.bl.x.val = right_pad.tl.x.val = right_pad.tr.x.val - pad.r * 2
 	render_simple_pad( right_pad, True )
+
+        top_pad = copy.deepcopy( pad )
+	top_pad.bl.y.val = top_pad.br.y.val = top_pad.tl.y.val + pad.r * 2
+	render_simple_pad( top_pad, True )
+
+        bottom_pad = copy.deepcopy( pad )
+	bottom_pad.tl.y.val = bottom_pad.tr.y.val = bottom_pad.bl.y.val - pad.r * 2
+	render_simple_pad( bottom_pad, True )
 
     elif pad.r == thickness:
         render_simple_pad( pad, True )
