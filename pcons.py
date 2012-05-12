@@ -12,12 +12,36 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from decimal import Decimal as D
-X, Y = 0, 1
+from sympy import *
+
+X, Y, XY = 0, 1, 2
+
+vals = dict()
+def addv(val):
+    try:
+        for n in val:
+            vals[n.val] = n
+    except:
+        vals[val.val] = val
+
+class capture(object):
+    def __init__(self, f):
+        self.f = f
+    def __call__(self, *args):
+        _args = []
+        for arg in args:
+            if type(arg) == Val:
+                vals[arg.val] = arg
+                _args.append(arg.val)
+            else:
+                _args.append(arg)
+        return self.f(*_args)
 
 class Val(object):
     "A value"
     def __init__(self, val = None):
+        if val is None:
+            val = Dummy()
         self.val = val
 
     def __repr__(self):
@@ -52,45 +76,23 @@ class Point:
     def __repr__(self):
         return """Point( %s )""" % ( str(self.pos) )
 
-class FixedDist(object):
-    "Represents a fixed distance constraint between two values"
+@capture
+def Mid( a, b, c ):
+    return (a + b) / S(2) - c
 
-    def __init__(self, sep, v1, v2):
-        "Constrain so that v2 = v1 + sep"
-        self.sep = sep
-        self.v = (v1,v2)
+def MidPoint( a, b, c, axis ):
+    assert axis in (X,Y,XY)
+    ret = []
 
-    def resolvable(self):
-        "Return True is it's possible to resolve this"
-        if self.v[0].val != None or self.v[1].val != None:
-            "We can do something if they're both not None"
-            return True
+    for i in X, Y:
+        if axis == i or axis == XY:
+            ret.append( Mid( a.pos[i], b.pos[i], c.pos[i] ) )
 
-        return False
+    return ret
 
-    def resolve(self):
-        "Attempt to resolve this constraint"
-
-        if not self.resolvable():
-            "Cannot be satisfied at this time"
-            return False
-
-        if self.v[0].val != None and self.v[1].val != None:
-            "Both values are already set"
-
-            if self.v[0].val + self.sep != self.v[1].val:
-                "This constraint has not been satisfied"
-                raise Exception("Unsatisfiable constraint")
-
-            # Contraint already satisfied
-            return True
-
-        if self.v[0].val != None:
-            self.v[1].val = self.v[0].val + self.sep
-        else:
-            self.v[0].val = self.v[1].val - self.sep
-
-        return True
+@capture
+def FixedDist(sep, v1, v2):
+    return v1 + sep - v2
 
 def Align( points, axis ):
     "Align all the given items in the specified axis"
@@ -98,14 +100,12 @@ def Align( points, axis ):
     c = []
 
     for p in points[1:]:
-        c.append( FixedDist( D(0),
-                             points[0].pos[axis],
-                             p.pos[axis] ) )
+        c.append( FixedDist( S(0), points[0].pos[axis], p.pos[axis] ) )
     return c
 
 class Pad(object):
     "A rectangular pad"
-    def __init__(self, size, name, clearance = 0, mask_clearance = 0, r = D("0")):
+    def __init__(self, size, name, clearance = 0, mask_clearance = 0, r = S(0)):
         self.cons = []
         self.size = size
         self.name = name
@@ -117,10 +117,10 @@ class Pad(object):
         self.bl, self.br, self.tl, self.tr = [ Point( (Val(), Val()) ) for x in range(0,4) ]
 
         # Constrain corners to be in-line
-        self.cons.append( FixedDist( D(0), self.bl.x, self.tl.x ) )
-        self.cons.append( FixedDist( D(0), self.br.x, self.tr.x ) )
-        self.cons.append( FixedDist( D(0), self.bl.y, self.br.y ) )
-        self.cons.append( FixedDist( D(0), self.tl.y, self.tr.y ) )
+        self.cons.append( FixedDist( S(0), self.bl.x, self.tl.x ) )
+        self.cons.append( FixedDist( S(0), self.br.x, self.tr.x ) )
+        self.cons.append( FixedDist( S(0), self.bl.y, self.br.y ) )
+        self.cons.append( FixedDist( S(0), self.tl.y, self.tr.y ) )
 
         # Space left-hand-side from right
         self.cons.append( FixedDist( size[X], self.bl.x, self.br.x ) )
@@ -208,8 +208,8 @@ class Design(object):
         # Entities
         self.ents = []
 
-        self.clearance = D("0.2")
-        self.mask_clearance = D("0.1")
+        self.clearance = S(0.2)
+        self.mask_clearance = S(0.1)
 
     def set_origin(self, point):
         self.cons.append( FixedDist( 0, point.x, O.x ) )
@@ -227,7 +227,7 @@ class Design(object):
         return hole
 
     def add_pad( self, size, name,
-                 clearance = None, mask_clearance = None, r = D("0") ):
+                 clearance = None, mask_clearance = None, r = S(0) ):
 
         if clearance == None:
             clearance = self.clearance
@@ -240,7 +240,7 @@ class Design(object):
         return pad
 
     def add_pad_array( self, pad_size, names, direction, pitch,
-                       clearance = None, mask_clearance = None, r = D("0") ):
+                       clearance = None, mask_clearance = None, r = S(0) ):
         pads = [ self.add_pad( pad_size, name,
                                clearance = clearance,
                                mask_clearance = mask_clearance, r = r ) for name in names ]
@@ -296,21 +296,6 @@ class Design(object):
         unsat += self.cons
         unsat += self._filter_obj_cons(self.ents)
 
-        satisfied = []
-        solved = 1
+        for key, val in solve(unsat).iteritems():
+            vals[key].val = val
 
-        while solved > 0 and len(unsat):
-            "Loop until there are no more soluble constraints"
-            sat = []
-
-            for c in unsat:
-                if c.resolve():
-                    "Constraint solved"
-                    sat.append(c)
-
-            solved = len(sat)
-            for c in sat:
-                satisfied.append(c)
-                unsat.remove(c)
-
-        return len(unsat)
